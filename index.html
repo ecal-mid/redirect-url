@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Url Redirection</title>
+	<style>
+
+		html, body {
+
+			margin: 0;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+
+			font-family: Roboto, helvetica, arial, sans-serif;
+		}
+
+		.main-container {
+
+		}
+
+		.disabled {
+			opacity: 0;
+			pointer-events: none;
+		}
+
+		.redirect-form {
+			display: flex;
+		}
+
+	</style>
+</head>
+<body>
+	<section class="main-container disabled">
+		<form class="redirect-form">
+			<label for="furl">Insert url:</label>
+			<input type="text" class="redirect-input" name="furl"><br>
+			<input type="submit" class="redirect-submit"value="Copy redirect link">
+			<span class="redirect-comment"></span>
+		</form>
+	</section>
+	<script type="text/javascript">
+		
+		window.addEventListener('load', function(e) {
+
+			//get redirect param
+			const redirectParam = 'redirect';
+			const urlParams = new URLSearchParams(this.location.search);
+			const redirect = urlParams.get(redirectParam);
+
+			//methods
+			const redirectTo = (url) => {
+				this.location.replace(url);
+			};
+
+			const initForm = () => {
+
+				const dom = {};
+
+				dom.cont = document.querySelector('.main-container');
+				dom.input = dom.cont.querySelector('.redirect-input');
+				dom.form = dom.cont.querySelector('.redirect-form');
+				dom.comment = dom.cont.querySelector('.redirect-comment');
+
+				dom.cont.classList.remove('disabled');
+
+				dom.input.addEventListener('focus', (e) => {
+					dom.comment.textContent = '';
+				});
+
+				dom.form.addEventListener('submit', (e) => {
+
+					const encodedUrl = encodeURI(dom.input.value);
+
+					urlParams.set(redirectParam, encodedUrl);
+
+					const redirectUrl = `${this.location.href}?${urlParams.toString()}`;
+
+					navigator.clipboard.writeText(redirectUrl).then(() => {
+
+						dom.comment.textContent = 'Link copied to clipboard!';
+						console.log(redirectUrl);
+
+					}, (err) => {
+						dom.comment.textContent = 'Link failed to be copied!';
+					});
+
+					dom.input.blur();
+
+					e.preventDefault();
+
+				});
+			};
+
+			redirect ? redirectTo(decodeURI(redirect)): initForm();
+
+		});
+
+	</script>
+</body>
+</html>

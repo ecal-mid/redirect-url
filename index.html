@@ -54,6 +54,15 @@
 			const redirectTo = (url) => {
 				this.location.replace(url);
 			};
+			
+			const sanitizeURL = (url) => {
+				try {
+					new URL(url);
+				} catch(e) {
+					url += `http://${url}`;
+				}
+				return url;
+			}
 
 			const initForm = () => {
 
@@ -72,7 +81,7 @@
 
 				dom.form.addEventListener('submit', (e) => {
 
-					const encodedUrl = encodeURI(dom.input.value);
+					const encodedUrl = encodeURI(sanitizeURL(dom.input.value));
 
 					urlParams.set(redirectParam, encodedUrl);
 

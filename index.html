@@ -38,6 +38,7 @@
 			<input type="submit" class="redirect-submit"value="Copy redirect link">
 			<span class="redirect-comment"></span>
 		</form>
+		<br>
 		<a href="https://github.com/ecal-mid/redirect-url">Github + Doc</a>
 	</section>
 	<script type="text/javascript">
@@ -66,7 +67,7 @@
 				dom.cont.classList.remove('disabled');
 
 				dom.input.addEventListener('focus', (e) => {
-					dom.comment.textContent = '';
+					dom.comment.innerHTML = '';
 				});
 
 				dom.form.addEventListener('submit', (e) => {
@@ -79,11 +80,11 @@
 
 					navigator.clipboard.writeText(redirectUrl).then(() => {
 
-						dom.comment.textContent = 'Link copied to clipboard!';
+						dom.comment.innerHTML = `<a href="${redirectUrl}">Link</a> copied to clipboard!`;
 						console.log(redirectUrl);
 
 					}, (err) => {
-						dom.comment.textContent = 'Link failed to be copied!';
+						dom.comment.innerHTML = `Link failed to be copied!`;
 					});
 
 					dom.input.blur();

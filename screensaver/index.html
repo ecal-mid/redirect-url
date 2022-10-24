@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Screensaver Redirect - ECAL MID</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: black;
+        font-family: Roboto, helvetica, arial, sans-serif;
+      }
+
+      .main-container {
+      }
+
+      .disabled {
+        display: none;
+        pointer-events: none;
+      }
+
+      .redirect-form {
+        background: white;
+        display: flex;
+      }
+
+      .hidden {
+        opacity: 0;
+      }
+
+      .disabled + .frame {
+        transition: opacity 1s;
+        position: fixed;
+        width: 100%;
+        pointer-events: none;
+        height: 100%;
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="main-container disabled">
+      <form class="redirect-form">
+        <label for="furl">Origin:</label>
+        <input type="text" class="origin-input" name="furl" /><br />
+        <label for="furl">Redirect to:</label>
+        <input type="text" class="redirect-input" name="furl" /><br />
+        <input
+          type="submit"
+          class="redirect-submit"
+          value="Copy redirect link"
+        />
+        <span class="redirect-comment"></span>
+      </form>
+      <!-- <br /> -->
+      <!-- <a href="https://github.com/ecal-mid/redirect-url">Github + Doc</a> -->
+    </section>
+    <iframe class="frame hidden"></iframe>
+    <script type="text/javascript">
+      window.addEventListener("load", function (e) {
+        //get redirect param
+        const redirectLink = "redirect";
+        const origLink = "origin";
+        const urlParams = new URLSearchParams(this.location.search);
+        const redirect = urlParams.get(redirectLink);
+        const origin = urlParams.get(origLink);
+        const dom = {};
+
+        //methods
+        const redirectTo = (url) => {
+          this.location.replace(url);
+        };
+
+        const sanitizeURL = (url) => {
+          try {
+            new URL(url);
+          } catch (e) {
+            url = `http://${url}`;
+          }
+          return url;
+        };
+
+        const initForm = () => {
+          dom.cont = document.querySelector(".main-container");
+          dom.input = dom.cont.querySelector(".redirect-input");
+          dom.originInput = dom.cont.querySelector(".origin-input");
+          dom.form = dom.cont.querySelector(".redirect-form");
+          dom.comment = dom.cont.querySelector(".redirect-comment");
+
+          dom.cont.classList.remove("disabled");
+
+          dom.input.addEventListener("focus", (e) => {
+            dom.comment.innerHTML = "";
+          });
+
+          dom.form.addEventListener("submit", (e) => {
+            const originUrl = encodeURI(sanitizeURL(dom.originInput.value));
+            const redirectUrl = encodeURI(sanitizeURL(dom.input.value));
+
+            urlParams.set(redirectLink, redirectUrl);
+            urlParams.set(origLink, originUrl);
+
+            const url = `${this.location.href}?${urlParams.toString()}`;
+
+            navigator.clipboard.writeText(url).then(
+              () => {
+                dom.comment.innerHTML = `<a href="${url}">Link</a> copied to clipboard!`;
+                console.log(url);
+              },
+              (err) => {
+                dom.comment.innerHTML = `Link failed to be copied!`;
+              }
+            );
+
+            dom.input.blur();
+
+            e.preventDefault();
+          });
+        };
+
+        if (origin) {
+          // https://player.vimeo.com/video/359271693?byline=0&dnt=1&background=1&dnt=1&muted=0
+          dom.frame = document.querySelector(".frame");
+          dom.frame.classList.remove("hidden");
+          dom.frame.src = origin;
+          dom.frame.onload = () => {
+            checkActivity((e) => {
+              dom.frame.ontransitionend = () => {
+                redirectTo(redirect);
+              };
+              dom.frame.classList.add("hidden");
+            });
+          };
+
+          function checkActivity(callback) {
+            let activated = false;
+
+            ["keydown", "click", "mousemove"].forEach((key) => {
+              window.addEventListener(key, (event) => {
+                if (activated) return;
+                callback();
+                activated = true;
+              });
+            });
+          }
+          //   https://vimeo.com/359271693
+          //   redirectTo(decodeURI(redirect));
+        } else {
+          initForm();
+        }
+      });
+    </script>
+  </body>
+</html>

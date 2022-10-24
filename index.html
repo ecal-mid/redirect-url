@@ -1,112 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="utf-8">
-	<title>URL Redirect - ECAL MID</title>
-	<style>
+  <head>
+    <meta charset="utf-8" />
+    <title>URL Redirect - ECAL MID</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
 
-		html, body {
+        font-family: Roboto, helvetica, arial, sans-serif;
+      }
 
-			margin: 0;
-			width: 100%;
-			height: 100%;
-			overflow: hidden;
+      .main-container {
+      }
 
-			font-family: Roboto, helvetica, arial, sans-serif;
-		}
+      .disabled {
+        opacity: 0;
+        pointer-events: none;
+      }
 
-		.main-container {
+      .redirect-form {
+        display: flex;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="main-container disabled">
+      <form class="redirect-form">
+        <label for="furl">Insert url:</label>
+        <input type="text" class="redirect-input" name="furl" /><br />
+        <input
+          type="submit"
+          class="redirect-submit"
+          value="Copy redirect link"
+        />
+        <span class="redirect-comment"></span>
+      </form>
+      <br />
+      <a href="./screensaver">Screensaver mode</a>
+      <br />
+      <a href="https://github.com/ecal-mid/redirect-url">Github + Doc</a>
+    </section>
+    <script type="text/javascript">
+      window.addEventListener("load", function (e) {
+        //get redirect param
+        const redirectParam = "redirect";
+        const urlParams = new URLSearchParams(this.location.search);
+        const redirect = urlParams.get(redirectParam);
 
-		}
+        //methods
+        const redirectTo = (url) => {
+          this.location.replace(url);
+        };
 
-		.disabled {
-			opacity: 0;
-			pointer-events: none;
-		}
+        const sanitizeURL = (url) => {
+          try {
+            new URL(url);
+          } catch (e) {
+            url = `http://${url}`;
+          }
+          return url;
+        };
 
-		.redirect-form {
-			display: flex;
-		}
+        const initForm = () => {
+          const dom = {};
 
-	</style>
-</head>
-<body>
-	<section class="main-container disabled">
-		<form class="redirect-form">
-			<label for="furl">Insert url:</label>
-			<input type="text" class="redirect-input" name="furl"><br>
-			<input type="submit" class="redirect-submit"value="Copy redirect link">
-			<span class="redirect-comment"></span>
-		</form>
-		<br>
-		<a href="https://github.com/ecal-mid/redirect-url">Github + Doc</a>
-	</section>
-	<script type="text/javascript">
-		
-		window.addEventListener('load', function(e) {
+          dom.cont = document.querySelector(".main-container");
+          dom.input = dom.cont.querySelector(".redirect-input");
+          dom.form = dom.cont.querySelector(".redirect-form");
+          dom.comment = dom.cont.querySelector(".redirect-comment");
 
-			//get redirect param
-			const redirectParam = 'redirect';
-			const urlParams = new URLSearchParams(this.location.search);
-			const redirect = urlParams.get(redirectParam);
+          dom.cont.classList.remove("disabled");
 
-			//methods
-			const redirectTo = (url) => {
-				this.location.replace(url);
-			};
-			
-			const sanitizeURL = (url) => {
-				try {
-					new URL(url);
-				} catch(e) {
-					url = `http://${url}`;
-				}
-				return url;
-			}
+          dom.input.addEventListener("focus", (e) => {
+            dom.comment.innerHTML = "";
+          });
 
-			const initForm = () => {
+          dom.form.addEventListener("submit", (e) => {
+            const encodedUrl = encodeURI(sanitizeURL(dom.input.value));
 
-				const dom = {};
+            urlParams.set(redirectParam, encodedUrl);
 
-				dom.cont = document.querySelector('.main-container');
-				dom.input = dom.cont.querySelector('.redirect-input');
-				dom.form = dom.cont.querySelector('.redirect-form');
-				dom.comment = dom.cont.querySelector('.redirect-comment');
+            const redirectUrl = `${this.location.href}?${urlParams.toString()}`;
 
-				dom.cont.classList.remove('disabled');
+            navigator.clipboard.writeText(redirectUrl).then(
+              () => {
+                dom.comment.innerHTML = `<a href="${redirectUrl}">Link</a> copied to clipboard!`;
+                console.log(redirectUrl);
+              },
+              (err) => {
+                dom.comment.innerHTML = `Link failed to be copied!`;
+              }
+            );
 
-				dom.input.addEventListener('focus', (e) => {
-					dom.comment.innerHTML = '';
-				});
+            dom.input.blur();
 
-				dom.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+          });
+        };
 
-					const encodedUrl = encodeURI(sanitizeURL(dom.input.value));
-
-					urlParams.set(redirectParam, encodedUrl);
-
-					const redirectUrl = `${this.location.href}?${urlParams.toString()}`;
-
-					navigator.clipboard.writeText(redirectUrl).then(() => {
-
-						dom.comment.innerHTML = `<a href="${redirectUrl}">Link</a> copied to clipboard!`;
-						console.log(redirectUrl);
-
-					}, (err) => {
-						dom.comment.innerHTML = `Link failed to be copied!`;
-					});
-
-					dom.input.blur();
-
-					e.preventDefault();
-
-				});
-			};
-
-			redirect ? redirectTo(decodeURI(redirect)): initForm();
-
-		});
-
-	</script>
-</body>
+        redirect ? redirectTo(decodeURI(redirect)) : initForm();
+      });
+    </script>
+  </body>
 </html>

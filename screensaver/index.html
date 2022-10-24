@@ -126,9 +126,9 @@
         if (origin) {
           // https://player.vimeo.com/video/359271693?byline=0&dnt=1&background=1&dnt=1&muted=0
           dom.frame = document.querySelector(".frame");
-          dom.frame.classList.remove("hidden");
           dom.frame.src = origin;
           dom.frame.onload = () => {
+            dom.frame.classList.remove("hidden");
             checkActivity((e) => {
               dom.frame.ontransitionend = () => {
                 redirectTo(redirect);
